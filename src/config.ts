@@ -41,6 +41,19 @@ export const config = {
   maxSlippageBps: optionalNumber("MAX_SLIPPAGE_BPS", 100),
   intervalMinutes: optionalNumber("INTERVAL_MINUTES", 5),
   dryRun: (process.env.DRY_RUN ?? "true").toLowerCase() !== "false",
+
+  // Safety floor: never let the wallet's TOKEN balance drop below this,
+  // no matter what a swap/balance computation says. Protects a permanent
+  // reserve (e.g. your wallet's 2% of total supply) from ever being burnt,
+  // even if a balance read is stale/wrong due to an RPC glitch.
+  reserveTokenBalance: optionalNumber("RESERVE_TOKEN_BALANCE", 20000000),
+  // If the computed "received" amount exceeds the quote by more than this
+  // multiplier, treat it as a bad read and abort the burn rather than
+  // trusting it. 2 = allow up to 2x the quoted amount before flagging.
+  maxReceivedVsQuoteMultiplier: optionalNumber(
+    "MAX_RECEIVED_VS_QUOTE_MULTIPLIER",
+    2
+  ),
 };
 
 export function assertConfigSane() {

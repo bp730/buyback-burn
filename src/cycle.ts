@@ -37,11 +37,34 @@ export async function runCycle() {
     ]);
 
     const minBalance = parseUnits(String(config.minUsdgBalance), usdgDecimals);
+    const reserveFloor = parseUnits(
+      String(config.reserveTokenBalance),
+      config.tokenDecimals
+    );
 
     logger.info("Cycle check", {
       usdgBalance: formatUnits(usdgBalance, usdgDecimals),
       minRequired: config.minUsdgBalance,
+      tokenBalanceBefore: formatUnits(tokenBalanceBefore, config.tokenDecimals),
+      reserveFloor: config.reserveTokenBalance,
     });
+
+    // Sanity check: the pre-swap TOKEN balance should already be at or
+    // above the reserve floor. If it's below, either the reserve hasn't
+    // been funded yet, or something already went wrong — either way,
+    // don't proceed with a swap/burn cycle until a human looks at it.
+    if (tokenBalanceBefore < reserveFloor) {
+      logger.error(
+        "Pre-cycle TOKEN balance is below the configured reserve floor. " +
+          "Refusing to run this cycle — check RPC health and wallet balance " +
+          "before continuing.",
+        {
+          tokenBalanceBefore: formatUnits(tokenBalanceBefore, config.tokenDecimals),
+          reserveFloor: config.reserveTokenBalance,
+        }
+      );
+      return;
+    }
 
     if (usdgBalance < minBalance) {
       logger.info("USDG balance below threshold, skipping this cycle");

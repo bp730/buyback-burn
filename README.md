@@ -92,6 +92,43 @@ token contract's own `swapRouter` is configured to use internally
 (visible in your `_swapCollectedDividends` logic) — using a different
 router risks pointing at a different or non-existent pool.
 
+## Reserve protection
+
+If this wallet also holds tokens that must **never** be burnt (e.g. a
+permanent 2% team/treasury reserve sitting in the same wallet as the
+buyback funds), set `RESERVE_TOKEN_BALANCE` in `.env` to that amount.
+
+Two independent safeguards enforce it, so a single bad number can't burn
+into the reserve:
+
+1. **Pre-cycle check** — if the wallet's TOKEN balance is already below
+   the reserve floor before a cycle even starts, the cycle refuses to run
+   and logs an error. This catches the case where the reserve itself was
+   somehow already compromised, or an RPC read is returning garbage.
+2. **Sanity bound on the swap result** — `received` (the balance delta
+   after swapping) is compared against the original quote. If it's more
+   than `MAX_RECEIVED_VS_QUOTE_MULTIPLIER`x the quote, the cycle aborts
+   without burning. This is the key defense against the scenario where a
+   stale/lagging RPC node returns `0` for the pre-swap balance — without
+   this check, the resulting balance delta would look like it includes
+   the entire reserve, and the bot would burn it.
+3. **Hard floor on the burn amount** — even after passing both checks
+   above, the actual amount sent to `burnTokens()` is capped so the
+   wallet's post-burn TOKEN balance can never go below the reserve floor.
+   This is the last line of defense regardless of what caused any of the
+   numbers above to be wrong.
+
+If any of these trip, the cycle logs an `ERROR` and skips the burn for
+that tick rather than guessing — make sure you have alerting on error
+logs in production so these get a human's attention promptly.
+
+**Even stronger option:** if it's feasible for your setup, keeping the 2%
+reserve in a *separate* wallet from the buyback/burn wallet removes this
+risk entirely — the burn wallet would then only ever hold newly-swapped
+tokens, so there's nothing sensitive for a bad read to endanger. The
+safeguards above exist specifically for the case where that's not
+practical and both balances have to share one wallet.
+
 ## Notes on scheduling in production
 
 `setInterval` inside a long-running Node process (as wired in `index.ts`)
