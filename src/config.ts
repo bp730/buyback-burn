@@ -29,9 +29,9 @@ export const config = {
   tokenAddress: required("TOKEN_ADDRESS") as Address,
   tokenDecimals: optionalNumber("TOKEN_DECIMALS", 18),
 
-  routerAddress: required("UNISWAP_V3_ROUTER_ADDRESS") as Address,
-  quoterAddress: required("UNISWAP_V3_QUOTER_ADDRESS") as Address,
-  poolFee: optionalNumber("UNISWAP_V3_POOL_FEE", 3000),
+  routerAddress: required("UNISWAP_V2_ROUTER_ADDRESS") as Address,
+  // How long (in seconds) a swap tx is allowed to sit before it reverts
+  swapDeadlineSeconds: optionalNumber("SWAP_DEADLINE_SECONDS", 300),
 
   burnMethod: (process.env.BURN_METHOD as BurnMethod) || "dead",
   burnAddress: (process.env.BURN_ADDRESS ||
