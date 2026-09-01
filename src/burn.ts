@@ -1,7 +1,20 @@
-import { erc20Abi } from "./abis.js";
+import { ERC20_ABI, erc20Abi } from "./abis.js";
 import { config } from "./config.js";
 import { publicClient, walletClient } from "./clients.js";
 import { logger } from "./logger.js";
+import { ethers } from 'ethers'
+
+
+const {
+  tokenAddress,
+  ethAddress,
+  usdgAddress,
+  hookAddress,
+  universalRouterAddress,
+  permit2Address,
+  rpcUrl,
+  privateKey
+} = config;
 
 export async function burnTokens(amount: bigint) {
   if (amount <= 0n) {
@@ -17,16 +30,19 @@ export async function burnTokens(amount: bigint) {
     return;
   }
 
+
   if (config.burnMethod === "burnFunction") {
     logger.info("Burning via token.burn(amount)", { amount: amount.toString() });
-    const hash = await walletClient.writeContract({
-      address: config.tokenAddress,
-      abi: erc20Abi,
-      functionName: "burn",
-      args: [amount],
-    });
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-    logger.info("Burn confirmed", { hash, status: receipt.status });
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    const signer = new ethers.Wallet(privateKey, provider);
+    const burnToken = new ethers.Contract(
+      tokenAddress,
+      ERC20_ABI,
+      signer
+    );
+    const burnTx = await burnToken.burn(amount.toString())
+    await burnTx.wait();
+    logger.info("Burn confirmed", { hash: burnTx.hash });
     return;
   }
 

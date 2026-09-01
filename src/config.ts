@@ -25,9 +25,22 @@ export const config = {
 
   privateKey: required("PRIVATE_KEY") as Hex,
 
+  ethAddress: '0x0000000000000000000000000000000000000000',
   usdgAddress: required("USDG_ADDRESS") as Address,
   tokenAddress: required("TOKEN_ADDRESS") as Address,
   tokenDecimals: optionalNumber("TOKEN_DECIMALS", 18),
+  // MKT/ETH
+  fee: optionalNumber("FEE", 0),
+  tickSpacing: optionalNumber("TICK_SPACING", 1),
+  hookAddress: required("HOOK_ADDR") as Address,
+  // USDG/ETH
+  ethUsdgFee: optionalNumber("ETH_USDG_FEE", 0),
+  ethUsdgTickSpacing: optionalNumber("ETH_USDG_TICK_SPACING", 1),
+  ethUsdgHookAddress: required("ETH_USDG_HOOK_ADDR") as Address,
+  useInitWalletBalance: (process.env.USE_INIT_WALLET_BALANCE ?? "false").toLowerCase() !== "false",
+  burnWalletInitBalance: optionalNumber("BUNR_WALLET_INIT_BALANCE", 0),
+  universalRouterAddress: required("UNIVERSAL_ROUTER_ADDRESS") as Address,
+  permit2Address: required("PERMIT2_ADDRESS") as Address,
 
   routerAddress: required("UNISWAP_V2_ROUTER_ADDRESS") as Address,
   // How long (in seconds) a swap tx is allowed to sit before it reverts
@@ -38,6 +51,7 @@ export const config = {
     "0x000000000000000000000000000000000000dEaD") as Address,
 
   minUsdgBalance: optionalNumber("MIN_USDG_BALANCE", 10),
+  maxUsdgSellAmount: optionalNumber("MAX_USDG_SELL_AMOUNT", 10),
   maxSlippageBps: optionalNumber("MAX_SLIPPAGE_BPS", 100),
   intervalMinutes: optionalNumber("INTERVAL_MINUTES", 5),
   dryRun: (process.env.DRY_RUN ?? "true").toLowerCase() !== "false",
@@ -47,13 +61,6 @@ export const config = {
   // reserve (e.g. your wallet's 2% of total supply) from ever being burnt,
   // even if a balance read is stale/wrong due to an RPC glitch.
   reserveTokenBalance: optionalNumber("RESERVE_TOKEN_BALANCE", 20000000),
-  // If the computed "received" amount exceeds the quote by more than this
-  // multiplier, treat it as a bad read and abort the burn rather than
-  // trusting it. 2 = allow up to 2x the quoted amount before flagging.
-  maxReceivedVsQuoteMultiplier: optionalNumber(
-    "MAX_RECEIVED_VS_QUOTE_MULTIPLIER",
-    2
-  ),
 };
 
 export function assertConfigSane() {

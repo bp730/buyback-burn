@@ -3,8 +3,9 @@ import { erc20Abi } from "./abis.js";
 import { config } from "./config.js";
 import { account, publicClient } from "./clients.js";
 import { logger } from "./logger.js";
-import { swapUsdgForToken } from "./swap.js";
+import { executeMultiHopSwap } from "./buyback.swap.js";
 import { burnTokens } from "./burn.js";
+import { manualProcessRewardSwap } from "./reward.swap.js";
 
 let running = false;
 
@@ -14,7 +15,7 @@ export async function runCycle() {
     return;
   }
   running = true;
-
+/*
   try {
     const [usdgDecimals, usdgBalance, tokenBalanceBefore] = await Promise.all([
       publicClient.readContract({
@@ -37,6 +38,9 @@ export async function runCycle() {
     ]);
 
     const minBalance = parseUnits(String(config.minUsdgBalance), usdgDecimals);
+    const maxSellAmount = parseUnits(String(config.maxUsdgSellAmount), usdgDecimals);
+    const burnWalletInitBalance = parseUnits(String(config.burnWalletInitBalance), 18);
+
     const reserveFloor = parseUnits(
       String(config.reserveTokenBalance),
       config.tokenDecimals
@@ -71,8 +75,9 @@ export async function runCycle() {
       return;
     }
 
+    const sellAmount = usdgBalance < maxSellAmount? usdgBalance: maxSellAmount;
     // Swap the entire USDG balance accumulated since last cycle.
-    await swapUsdgForToken(usdgBalance);
+    await executeMultiHopSwap(sellAmount.toString());
 
     if (config.dryRun) {
       // In dry run we never actually received tokens, so nothing to burn.
@@ -87,7 +92,8 @@ export async function runCycle() {
       args: [account.address],
     });
 
-    const received = tokenBalanceAfter - tokenBalanceBefore;
+    console.log("Use Init walletBalance:", config.useInitWalletBalance);
+    const received = tokenBalanceAfter - (config.useInitWalletBalance ? burnWalletInitBalance:  tokenBalanceBefore); // 
     if (received <= 0n) {
       logger.warn("No tokens received from swap, skipping burn");
       return;
@@ -102,4 +108,6 @@ export async function runCycle() {
   } finally {
     running = false;
   }
+*/
+  await manualProcessRewardSwap();
 }
