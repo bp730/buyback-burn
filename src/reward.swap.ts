@@ -24,7 +24,7 @@ export async function manualProcessRewardSwap() {
             console.log("RewardSwap Processing...");
             const approveTx = await rewardToken.processRewardSwap(1);
 
-            console.log("RewardSwap tx:", approveTx.hash);
+            console.log("===> RewardSwap tx:", approveTx.hash);
 
             await approveTx.wait();
 

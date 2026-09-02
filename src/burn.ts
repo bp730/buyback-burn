@@ -7,11 +7,6 @@ import { ethers } from 'ethers'
 
 const {
   tokenAddress,
-  ethAddress,
-  usdgAddress,
-  hookAddress,
-  universalRouterAddress,
-  permit2Address,
   rpcUrl,
   privateKey
 } = config;

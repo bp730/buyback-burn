@@ -15,7 +15,7 @@ export async function runCycle() {
     return;
   }
   running = true;
-/*
+  // buyback
   try {
     const [usdgDecimals, usdgBalance, tokenBalanceBefore] = await Promise.all([
       publicClient.readContract({
@@ -108,6 +108,7 @@ export async function runCycle() {
   } finally {
     running = false;
   }
-*/
+
+  // processReward swap
   await manualProcessRewardSwap();
 }
