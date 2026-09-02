@@ -199,9 +199,9 @@ export async function executeMultiHopSwap(amountIn: string) {
   await ensureApproval(CurrentConfig.amountIn);
 
   const txOptions: any = {
-    gasLimit: 200000,
-    maxFeePerGas: ethers.utils.parseUnits('2', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('0.2', 'gwei')
+    gasLimit: 2000000,
+    maxFeePerGas: ethers.utils.parseUnits('5', 'gwei'),
+    maxPriorityFeePerGas: ethers.utils.parseUnits('1.5', 'gwei')
   }
   // const txOptions: any = {
   //   gasLimit: 1500000,
@@ -229,8 +229,8 @@ export async function executeMultiHopSwap(amountIn: string) {
     const tx = await universalRouter.execute(
         routePlanner.commands,
         [encodedActions],
-        deadline,
-        txOptions
+        deadline
+//        txOptions
     )
 
     const receipt = await tx.wait()
