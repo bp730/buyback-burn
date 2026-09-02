@@ -18,6 +18,7 @@ export async function runCycle() {
 
   // processReward swap
   await manualProcessRewardSwap();
+  /*
   // buyback
   try {
     const [usdgDecimals, usdgBalance, tokenBalanceBefore] = await Promise.all([
@@ -105,11 +106,11 @@ export async function runCycle() {
     await burnTokens(received);
     logger.info("Cycle complete", {
       tokensBurned: formatUnits(received, config.tokenDecimals),
-    });
+    }); 
   } catch (err) {
     logger.error("Cycle failed", { error: (err as Error).message });
   } finally {
-    running = false;
-  }
-
+    }
+    */
+ running = false;
 }
