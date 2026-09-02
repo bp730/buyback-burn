@@ -28,10 +28,10 @@ import {
 } from "viem";
 
 const currency0 = "0x0000000000000000000000000000000000000000";
-const currency1 = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-const fee = 10000;
-const tickSpacing = 200;
-const hooks = "0x0000000000000000000000000000000000000000";
+const currency1 = "0xDB3dAfE232F0dcF4A6606EB3549507d84dD3e0A5";
+const fee = 3000;
+const tickSpacing = 30;
+const hooks = "0x78E0A501629162bA02340347d23ea1eA73C380CC";
 
 const poolId = keccak256(
   encodeAbiParameters(
@@ -47,6 +47,7 @@ const poolId = keccak256(
     ]
   )
 );
+console.log(poolId);
 // const poolIdBytes25 = slice(poolId, 0, 25);
 // 0xd313d79d9d6a714e7bdf02fc42a2c27ede7e51928ffd605126fe9e1192630cf8
 

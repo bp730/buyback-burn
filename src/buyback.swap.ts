@@ -229,9 +229,8 @@ export async function executeMultiHopSwap(amountIn: string) {
     const tx = await universalRouter.execute(
         routePlanner.commands,
         [encodedActions],
-        deadline
-        // ,
-        // txOptions
+        deadline,
+        txOptions
     )
 
     const receipt = await tx.wait()
