@@ -3,11 +3,13 @@ import { erc20Abi } from "./abis.js";
 import { config } from "./config.js";
 import { account, publicClient } from "./clients.js";
 import { logger } from "./logger.js";
-import { executeMultiHopSwap } from "./buyback.swap.js";
+import { executeBuybackMultihopSwap } from "./buyback.swap.js";
 import { burnTokens } from "./burn.js";
 import { manualProcessRewardSwap } from "./reward.swap.js";
+import { executeTakeFeeSwap } from "./takefee.js";
 
 let running = false;
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function runCycle() {
   if (running) {
@@ -16,9 +18,6 @@ export async function runCycle() {
   }
   running = true;
 
-  // processReward swap
-  await manualProcessRewardSwap();
-  /*
   // buyback
   try {
     const [usdgDecimals, usdgBalance, tokenBalanceBefore] = await Promise.all([
@@ -40,6 +39,9 @@ export async function runCycle() {
         args: [account.address],
       }),
     ]);
+
+    // 1 USDG -> ETH
+    await executeTakeFeeSwap(usdgBalance.toString());
 
     const minBalance = parseUnits(String(config.minUsdgBalance), usdgDecimals);
     const maxSellAmount = parseUnits(String(config.maxUsdgSellAmount), usdgDecimals);
@@ -81,14 +83,14 @@ export async function runCycle() {
 
     const sellAmount = usdgBalance < maxSellAmount? usdgBalance: maxSellAmount;
     // Swap the entire USDG balance accumulated since last cycle.
-    await executeMultiHopSwap(sellAmount.toString());
+    await executeBuybackMultihopSwap(sellAmount.toString());
 
     if (config.dryRun) {
       // In dry run we never actually received tokens, so nothing to burn.
       logger.info("[DRY RUN] Cycle complete (no on-chain state changed)");
       return;
     }
-
+    await sleep(10000);
     const tokenBalanceAfter = await publicClient.readContract({
       address: config.tokenAddress,
       abi: erc20Abi,
@@ -109,8 +111,7 @@ export async function runCycle() {
     }); 
   } catch (err) {
     logger.error("Cycle failed", { error: (err as Error).message });
-  } finally {
-    }
-    */
- running = false;
+  } finally { }
+  
+  running = false;
 }

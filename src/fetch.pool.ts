@@ -62,6 +62,6 @@ console.log(poolId);
 // and then go to positionManager contract and read poolkeys using this 25bytes id
 // you can find positionManager address from https://developers.uniswap.org/docs/protocols/v4/deployments
 // https://sepolia.etherscan.io/token/0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4#readProxyContract
-const ethusdgid = "0x946b7ba052aab58eca22590b8db05190154cd4ffe470acb247abfc14f40a0479";
+const ethusdgid = "0x269599466671506397946670150870196306736371444225405724811036102492160";
 const ethusdg25 = slice(ethusdgid, 0, 25);
 console.log(poolId, ethusdg25);

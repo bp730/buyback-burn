@@ -42,7 +42,7 @@ const MKT_ETH_POOL_KEY: PoolKey = {
   hooks: hookAddress,
 };
 
-const ETH_USDC_POOL_KEY: PoolKey = {
+const ETH_USDG_POOL_KEY: PoolKey = {
   currency0: ethAddress,
   currency1: usdgAddress,
   fee: ethUsdgFee,
@@ -158,7 +158,7 @@ async function ensureApproval(amountIn: string) {
 }
 
 // Main swap function
-export async function executeMultiHopSwap(amountIn: string) {
+export async function executeBuybackMultihopSwap(amountIn: string) {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
   const signer = new ethers.Wallet(privateKey, provider);
   const address = await signer.getAddress();
@@ -167,7 +167,7 @@ export async function executeMultiHopSwap(amountIn: string) {
   // Check ETH balance
   const balance = await provider.getBalance(address);
   const balanceInEth = ethers.utils.formatEther(balance);
-  if (parseFloat(balanceInEth) < 0.0001) {
+  if (parseFloat(balanceInEth) < 0.001) {
     throw new Error(`❌ Insufficient balance: ${balanceInEth} ETH. Minimum required: 0.001 ETH`);
   }
 
@@ -175,8 +175,8 @@ export async function executeMultiHopSwap(amountIn: string) {
   const CurrentConfig: SwapExactIn = {
     currencyIn: inputAddress,
     path: encodeMultihopExactInPath(
-      [ETH_USDC_POOL_KEY, MKT_ETH_POOL_KEY],
-      tokenAddress
+      [ETH_USDG_POOL_KEY, MKT_ETH_POOL_KEY],
+      usdgAddress
     ),
     amountIn: amountIn,
     amountOutMinimum: "1", // Change according to the slippage desired
@@ -198,16 +198,6 @@ export async function executeMultiHopSwap(amountIn: string) {
 
   await ensureApproval(CurrentConfig.amountIn);
 
-  const txOptions: any = {
-    gasLimit: 2000000,
-    maxFeePerGas: ethers.utils.parseUnits('5', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('1.5', 'gwei')
-  }
-  // const txOptions: any = {
-  //   gasLimit: 1500000,
-  //   maxFeePerGas: ethers.utils.parseUnits('30', 'gwei'),
-  //   maxPriorityFeePerGas: ethers.utils.parseUnits('2', 'gwei')
-  // }
   // Prepare transaction
   const universalRouter = new ethers.Contract(
     universalRouterAddress,
@@ -215,13 +205,18 @@ export async function executeMultiHopSwap(amountIn: string) {
     signer
   );
 
+  const txOptions = {
+    gasLimit: 1000000,
+    maxFeePerGas: ethers.utils.parseUnits("0.5", "gwei"),
+    maxPriorityFeePerGas: ethers.utils.parseUnits('0.5', 'gwei')
+  };
 
   try {
     // await universalRouter.callStatic.execute(
     //   routePlanner.commands,
     //   [encodedActions],
-    //   deadline,
-    //   txOptions
+    //   deadline
+    //   // txOptions
     // );
     // console.log("Simulation succeeded");
 
@@ -229,8 +224,8 @@ export async function executeMultiHopSwap(amountIn: string) {
     const tx = await universalRouter.execute(
         routePlanner.commands,
         [encodedActions],
-        deadline
-//        txOptions
+        deadline,
+        txOptions
     )
 
     const receipt = await tx.wait()
